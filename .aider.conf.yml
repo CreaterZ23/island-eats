@@ -1,0 +1,6 @@
+map-tokens: 4096
+# Always suggest these files when starting
+read:
+  - island-eats/package.json
+  - island-eats/src/App.jsx
+

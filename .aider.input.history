@@ -1,0 +1,257 @@
+
+# 2026-02-12 20:32:14.433741
++/ex
+
+# 2026-02-12 20:37:17.415048
++/add island-eats/package.json
++
++The scripts are still missing from island-eats/package.json. Please overwrite the "scripts" section exactly as follows:
++
++"scripts": {
++  "dev": "vite",
++  "build": "vite build",
++  "preview": "vite preview",
++  "test": "vitest"
++}
++
++And verify that 'lucide-react' and '@reduxjs/toolkit' are in the dependencies so the UI doesn't crash.
+
+# 2026-02-12 20:37:24.545270
++y
+
+# 2026-02-12 20:39:19.986231
++/ex
+
+# 2026-02-12 20:53:32.906236
++/add island-eats/src/App.jsx island-eats/package.json
++
++We are integrating the Firebase backend for the Sunday Special store. 
++
++1. CONFIG: Create 'island-eats/src/firebase.js'. Use the config I provide below to initialize Firebase Auth and Firestore.
++[PASTE YOUR FIREBASE CONFIG HERE]
++
++2. REAL-TIME SCARCITY:
++   - In Firestore, we need a 'metadata' collection with a document 'sunday-drop'. 
++   - It should have a field 'ordersCount'.
++   - In 'App.jsx', use 'onSnapshot' to listen to this count.
++   - Update the UI Progress Bar: 'Slots Remaining: {20 - ordersCount}/20'.
++
++3. BUSINESS RULES:
++   - If 'ordersCount' >= 20, change the 'Add to Cart' buttons to say "SOLD OUT" and disable them.
++   - If today is NOT Sunday (optional but pro), show a countdown: "Next Drop: Sunday @ 12:00 PM".
++
++4. CHECKOUT:
++   - Create a 'placeOrder' function that:
++     a) Checks if the user is logged in (use Firebase Auth).
++     b) If yes, adds the order to an 'orders' collection.
++     c) Increments the 'ordersCount' in 'metadata' using a Firestore 'increment' transaction (to prevent over-selling).
+
+# 2026-02-12 20:53:48.308891
++y
+
+# 2026-02-12 20:55:08.449365
++/add package.json src/App.jsx src/main.jsx
+
+# 2026-02-12 20:55:16.902704
++We are integrating Firebase for the Sunday Special.
++
++1. CONFIG: Create 'src/firebase.js'. Use this config:
++[PASTE YOUR ACTUAL FIREBASE SDK CONFIG OBJECT HERE]
++
++2. SCARCITY: 
++   - Use 'onSnapshot' in 'App.jsx' to watch the 'ordersCount' in 'metadata/sunday-drop'.
++   - UI should show: "{20 - ordersCount} slots remaining".
++
++3. CHECKOUT:
++   - Create 'placeOrder' in 'App.jsx'. 
++   - It must use a Firestore transaction to increment 'ordersCount' so we never go over 20 orders.
++   - If 'ordersCount' is 20, disable all "Add to Cart" buttons.
++
++4. UI: Add a "Login with Google" button in the Navbar using Firebase Auth.
+
+# 2026-02-12 20:56:06.061070
++yes
+
+# 2026-02-12 20:56:12.082731
++/run npm install firebase
+
+# 2026-02-12 20:56:12.082973
++/run npm install firebase
+
+# 2026-02-12 20:56:36.819656
++yes
+
+# 2026-02-12 20:56:41.601021
++n
+
+# 2026-02-12 20:56:54.257727
++// Import the functions you need from the SDKs you need
++import { initializeApp } from "firebase/app";
++import { getAnalytics } from "firebase/analytics";
++// TODO: Add SDKs for Firebase products that you want to use
++// https://firebase.google.com/docs/web/setup#available-libraries
++
++// Your web app's Firebase configuration
++// For Firebase JS SDK v7.20.0 and later, measurementId is optional
++const firebaseConfig = {
++  apiKey: "AIzaSyDZmHAS-T47jY-hC74OPQbm34zY7WCQzKs",
++  authDomain: "island-eats-sunday-special.firebaseapp.com",
++  projectId: "island-eats-sunday-special",
++  storageBucket: "island-eats-sunday-special.firebasestorage.app",
++  messagingSenderId: "167457735116",
++  appId: "1:167457735116:web:f6a4bbc8ff46e1c1dc5d69",
++  measurementId: "G-85LPM4JMHE"
++};
++
++// Initialize Firebase
++const app = initializeApp(firebaseConfig);
++const analytics = getAnalytics(app);
+
+# 2026-02-12 20:58:04.935057
++/add package.json src/App.jsx
++
++I am setting up the Firebase backend. 
++
++1. Create 'src/firebase.js' with the following configuration:
++
++import { initializeApp } from "firebase/app";
++import { getAnalytics } from "firebase/analytics";
++import { getAuth } from "firebase/auth";
++import { getFirestore } from "firebase/firestore";
++
++const firebaseConfig = {
++  apiKey: "AIzaSyDZmHAS-T47jY-hC74OPQbm34zY7WCQzKs",
++  authDomain: "island-eats-sunday-special.firebaseapp.com",
++  projectId: "island-eats-sunday-special",
++  storageBucket: "island-eats-sunday-special.firebasestorage.app",
++  messagingSenderId: "167457735116",
++  appId: "1:167457735116:web:f6a4bbc8ff46e1c1dc5d69",
++  measurementId: "G-85LPM4JMHE"
++};
++
++const app = initializeApp(firebaseConfig);
++export const auth = getAuth(app);
++export const db = getFirestore(app);
++export const analytics = getAnalytics(app);
++
++2. Update 'src/App.jsx' to use 'onSnapshot' to listen to 'metadata/sunday-drop' in Firestore for the 'ordersCount'. 
++3. Ensure the scarcity bar and "Add to Cart" buttons reflect this real-time count (limit 20).
+
+# 2026-02-12 20:58:24.614747
++/add package.json src/App.jsx
+
+# 2026-02-12 20:58:42.793881
++I am setting up the Firebase backend. 
++
++1. Create 'src/firebase.js' with the following configuration:
++
++import { initializeApp } from "firebase/app";
++import { getAnalytics } from "firebase/analytics";
++import { getAuth } from "firebase/auth";
++import { getFirestore } from "firebase/firestore";
++
++const firebaseConfig = {
++  apiKey: "AIzaSyDZmHAS-T47jY-hC74OPQbm34zY7WCQzKs",
++  authDomain: "island-eats-sunday-special.firebaseapp.com",
++  projectId: "island-eats-sunday-special",
++  storageBucket: "island-eats-sunday-special.firebasestorage.app",
++  messagingSenderId: "167457735116",
++  appId: "1:167457735116:web:f6a4bbc8ff46e1c1dc5d69",
++  measurementId: "G-85LPM4JMHE"
++};
++
++const app = initializeApp(firebaseConfig);
++export const auth = getAuth(app);
++export const db = getFirestore(app);
++export const analytics = getAnalytics(app);
++
++2. Update 'src/App.jsx' to use 'onSnapshot' to listen to 'metadata/sunday-drop' in Firestore for the 'ordersCount'. 
++3. Ensure the scarcity bar and "Add to Cart" buttons reflect this real-time count (limit 20).
+
+# 2026-02-12 20:58:47.950653
++yes
+
+# 2026-02-12 21:01:51.282152
++/run npm install
+
+# 2026-02-12 21:01:51.282575
++/run npm install
+
+# 2026-02-12 21:02:02.519601
++yes
+
+# 2026-02-12 21:02:06.064823
++/ex
+
+# 2026-02-12 21:21:07.737242
++/add src/App.jsx src/components/FoodGrid.jsx src/components/CartDrawer.jsx
+
+# 2026-02-12 21:21:13.287665
++yes
+
+# 2026-02-12 21:21:28.618532
++1. AUTH: Update the Navbar to include a "Sign In" button using Firebase 'signInWithPopup' (Google). Store the user in a local state so we know who is ordering.
++2. CHECKOUT LOGIC: In the Cart Drawer, create a 'handleCheckout' function that:
++   - Checks if a user is logged in.
++   - Uses a Firestore 'runTransaction' to:
++     a. Read the current 'ordersCount' from 'metadata/sunday-drop'.
++     b. If count < 20, increment it by 1 and save the order details to a new 'orders' collection.
++     c. If count >= 20, throw an error: "Sorry, we just sold out!"
++3. UX: When the 'ordersCount' hits 20, globally disable all 'Add to Cart' buttons and change the Hero banner to "SOLD OUT - See you next Sunday!"
++4. SUCCESS: On a successful transaction, clear the Redux cart and show a "Feast Reserved!" confirmation message.
+
+# 2026-02-12 21:30:39.523546
++/add src/App.jsx src/components/FoodGrid.jsx src/components/CartDrawer.jsx src/firebase.js
+
+# 2026-02-12 21:30:51.646868
++1. AUTH UI: Add a "Sign In with Google" button to the Navbar. When clicked, it should trigger 'signInWithPopup(auth, provider)' from 'src/firebase.js'.
++2. TRANSACTIONAL CHECKOUT: In 'CartDrawer.jsx', implement a 'handleCheckout' function using Firestore 'runTransaction'. 
++   - It must first read 'metadata/sunday-drop' to check 'ordersCount'.
++   - If 'ordersCount < 20', increment it and save the user's cart to an 'orders' collection.
++   - If 'ordersCount >= 20', show a "Sold Out" alert and prevent the order.
++3. SCARCITY SYNC: Ensure the "Add to Cart" buttons in 'FoodGrid.jsx' are disabled if the global 'ordersCount' is 20.
++4. ORDER SUCCESS: After a successful checkout, clear the Redux cart and show a "Feast Reserved!" confirmation.
+
+# 2026-02-12 21:32:43.544290
++/exit
+
+# 2026-02-12 21:35:14.497696
++/add src/App.jsx src/firebase.js
+
+# 2026-02-12 21:35:28.942786
++1. SUNDAY LOGIC: Add a utility function in 'src/firebase.js' called 'resetSundayDrop' that sets 'metadata/sunday-drop/ordersCount' back to 0.
++2. AUTOMATION THOUGHTS: Since we are using Firebase, we will eventually deploy a 'Firebase Scheduled Function' (cron job) to run this every Monday at 00:00. For now, add a hidden button in the Navbar only visible to you (admin) to trigger this reset for testing.
++3. FINAL UI POLISH: Ensure the 'App.jsx' has a clean 'Checkout Success' state that shows a tropical confirmation message once the transaction finishes.
+
+# 2026-02-12 21:41:50.848260
++y
+
+# 2026-02-12 21:42:37.799020
++/ex
+
+# 2026-02-13 10:40:50.125160
++/add src/App.jsx src/components/FoodGrid.jsx src/components/CartDrawer.jsx src/firebase.js
+
+# 2026-02-13 10:40:59.901721
++1. FIRESTORE SCHEMA: Update the 'metadata/sunday-drop' document to track 'stock': { chicken: 30, pie: 30, callaloo: 45, juice: 45 }.
++2. COMBO LOGIC: In 'handleCheckout', a "Combo" order must check if chicken, pie, callaloo, AND juice are all > 0. If yes, decrement all four.
++3. INDIVIDUAL LOGIC: Individual items only decrement their specific stock.
++4. UI DYNAMICS: 
++   - If chicken <= 0 OR pie <= 0, the "Sunday Feast Combo" must show "SOLD OUT".
++   - If callaloo hits 0, the individual Callaloo item shows "SOLD OUT", but the others remain available.
++5. REAL-TIME: Use the 'onSnapshot' to ensure the FoodGrid buttons disable instantly as soon as any specific stock hits zero.
+
+# 2026-02-13 10:42:08.472329
++yes
+
+# 2026-02-13 10:43:10.813338
++remove we
+
+# 2026-02-13 10:43:20.635973
++yes
+
+# 2026-02-13 10:43:20.652111
++/run rm We
+
+# 2026-02-13 10:43:20.652298
++/run rm We
